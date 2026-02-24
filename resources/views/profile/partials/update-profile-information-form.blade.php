@@ -9,6 +9,26 @@
         </p>
     </header>
 
+    <!-- Account Information -->
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg space-y-3">
+        <div>
+            <span class="text-sm font-medium text-gray-700">Account Role:</span>
+            <span class="text-sm text-gray-900 ml-2">
+                {{ $user->is_admin ? 'Global Admin' : 'Member' }}
+            </span>
+        </div>
+        <div>
+            <span class="text-sm font-medium text-gray-700">Reputation:</span>
+            <span class="text-sm text-gray-900 ml-2">{{ $user->reputation }} points</span>
+        </div>
+        <div>
+            <span class="text-sm font-medium text-gray-700">Account Status:</span>
+            <span class="text-sm ml-2 {{ $user->is_banned ? 'text-red-600' : 'text-green-600' }}">
+                {{ $user->is_banned ? 'Banned' : 'Active' }}
+            </span>
+        </div>
+    </div>
+
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
         @csrf
     </form>
