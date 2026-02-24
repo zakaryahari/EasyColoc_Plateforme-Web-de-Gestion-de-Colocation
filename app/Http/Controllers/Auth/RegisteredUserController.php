@@ -41,6 +41,10 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        if (User::count() === 1) {
+            $user->update(['is_admin' => true]);
+        }
+
         event(new Registered($user));
 
         Auth::login($user);
