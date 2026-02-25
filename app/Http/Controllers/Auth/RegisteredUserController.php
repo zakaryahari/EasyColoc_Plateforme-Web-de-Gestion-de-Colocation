@@ -41,7 +41,9 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        if (User::count() === 1) {
+        $How_many_users = User::count();
+
+        if ($How_many_users == 1) {
             $user->update(['is_admin' => true]);
         }
 
