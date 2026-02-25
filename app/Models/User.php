@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Membership;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -49,6 +50,15 @@ class User extends Authenticatable
             'is_admin' => 'boolean',
             'is_banned' => 'boolean',
         ];
+    }
+
+    public function hasActiveMembership(){
+        $ActiveMembership_count = Membership::where('user_id', $this->id)->whereNull('left_at')->count();
+
+        if ($ActiveMembership_count > 0) {
+            return true;
+        }
+        return false;
     }
 
     public function colocations()
