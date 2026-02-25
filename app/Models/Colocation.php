@@ -8,6 +8,7 @@ class Colocation extends Model
 {
     protected $fillable = [
         'name',
+        'description',
         'status',
         'owner_id',
     ];
