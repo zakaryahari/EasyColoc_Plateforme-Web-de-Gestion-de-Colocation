@@ -120,6 +120,22 @@ class ColocationController extends Controller
      */
     public function destroy(string $id)
     {
-
+        $colocation = Colocation::findOrFail($id);
+        
+        $userRole = DB::table('colocation_user')
+            ->where('colocation_id', $id)
+            ->where('user_id', auth()->id())
+            ->whereNull('left_at')
+            ->value('role');
+        
+        if ($userRole !== 'owner') {
+            abort(403);
+        }
+        
+        $colocation->delete();
+        
+        return redirect()->route('dashboard')->with('success', 'Colocation deleted successfully!');
     }
+    
+
 }
