@@ -6,6 +6,7 @@ use App\Models\Expense;
 use App\Models\ExpenseShare;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ExpenceController extends Controller
 {
@@ -14,7 +15,14 @@ class ExpenceController extends Controller
      */
     public function index()
     {
-        //
+        $col_id = auth()->user()->activeMembership->colocation_id;
+
+        $All_Expenses = Expense::where('colocation_id', $col_id)
+            ->with('payer') 
+            ->latest() 
+            ->get();
+
+        return view('expenses.index', compact('All_Expenses'));
     }
 
     /**
@@ -89,7 +97,7 @@ class ExpenceController extends Controller
      */
     public function show(string $id)
     {
-        //
+
     }
 
     /**
@@ -114,5 +122,10 @@ class ExpenceController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function pay($id)
+    {
+
     }
 }
