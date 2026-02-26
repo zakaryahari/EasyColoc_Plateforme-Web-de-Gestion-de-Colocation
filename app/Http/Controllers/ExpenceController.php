@@ -97,7 +97,21 @@ class ExpenceController extends Controller
      */
     public function show(string $id)
     {
+        $expense = Expense::findOrFail($id);
 
+        $shares = ExpenseShare::where('expense_id', $id)->with('user')->get();
+
+        $houseOwnerId = DB::table('colocation_user')
+            ->where('colocation_id', $expense->colocation_id)
+            ->where('role', 'owner')
+            ->whereNull('left_at')
+            ->value('user_id');
+
+        return view('expenses.show', [
+            'expense' => $expense,
+            'shares' => $shares,
+            'houseOwnerId' => $houseOwnerId
+        ]);
     }
 
     /**
