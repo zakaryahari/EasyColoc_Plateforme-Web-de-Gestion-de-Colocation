@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invitation;
+use App\Models\Membership;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class InvitationController extends Controller
@@ -25,6 +27,35 @@ class InvitationController extends Controller
         //
     }
 
+    public function accept(Request $request , $token = null)
+    {
+        $token = $request->token ?? $token;
+
+        $Invitation = Invitation::where('token' , $token)->firstOrFail();
+
+        if (auth()->user()->hasActiveMembership()) {
+            return redirect()->route('colocations.show')
+            ->with('error', 'You are already a member of a colocation.'); 
+        }
+
+        DB::transaction(function () use ($invitation) {
+        
+ 
+            Membership::create([
+                'user_id' => auth()->id(),
+                'colocation_id' => $invitation->id_colocation,
+                'role' => 'member', 
+                'joined_at' => now(),
+            ]);
+
+            
+            $invitation->delete();
+        });
+
+        return redirect()->route('colocations.show')
+            ->with('success', 'Welcome to your new colocation!');
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -37,20 +68,23 @@ class InvitationController extends Controller
         $Random_Token = str(random(32));
 
         $activeMembership = auth()->user()->memberships()->whereNull('left_at')->first();
-        $id_colocation = $activeMembership->id_colocation;
         
         if (!$activeMembership) {
             return redirect()->back()->with('error', 'You must be in a house to invite people.');
-        }
-
+            }
+        
+        $id_colocation = $activeMembership->id_colocation;
+            
         Invitation::create([
             'email' => $request->email,
             'token' => $Random_Token,
             'id_colocation' => $id_colocation
         ]);
 
-        Mail::raw($request->email, $Random_Token);
-
+        Mail::raw("You have been invited! Your token is: " . $Random_Token, function ($message) use ($request) {
+            $message->to($request->email)
+                    ->subject('Invitation to join a Colocation');
+        });
         return response()->json(['message' => 'Invitation sent | Token : '. $Random_Token]);
     }
 
