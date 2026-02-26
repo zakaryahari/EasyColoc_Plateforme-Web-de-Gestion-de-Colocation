@@ -25,10 +25,21 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = $request->user();
+
+ 
+        if ($user->is_admin) {
+            return redirect()->intended(route('admin.users'));
+        }
+
+        if ($user->hasActiveMembership()) {
+            return redirect()->intended(route('colocations.show'));
+        }
+
+        
+        return redirect()->intended(route('colocations.choice'));
     }
 
     /**
