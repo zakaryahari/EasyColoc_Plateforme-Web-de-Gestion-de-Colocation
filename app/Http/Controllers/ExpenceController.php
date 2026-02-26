@@ -140,6 +140,27 @@ class ExpenceController extends Controller
 
     public function pay($id)
     {
-
+        $share = ExpenseShare::findOrFail($id);
+        
+        $colocationId = $share->expense->colocation_id;
+        
+        $isOwner = DB::table('colocation_user')
+            ->where('colocation_id', $colocationId)
+            ->where('user_id', auth()->id())
+            ->where('role', 'owner')
+            ->whereNull('left_at')
+            ->exists();
+        
+        if ($isOwner) {
+            $share->update(['is_paid' => true]);
+            return redirect()->back()->with('success', 'Payment marked as paid.');
+        }
+        
+        if ($share->user_id == auth()->id()) {
+            $share->update(['is_paid' => true]);
+            return redirect()->back()->with('success', 'Payment marked as paid.');
+        }
+        
+        abort(403);
     }
 }
