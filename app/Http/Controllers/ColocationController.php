@@ -70,7 +70,19 @@ class ColocationController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $colocation = Colocation::findOrFail($id);
+        
+        $userRole = DB::table('colocation_user')
+            ->where('colocation_id', $id)
+            ->where('user_id', auth()->id())
+            ->whereNull('left_at')
+            ->value('role');
+        
+        if ($userRole !== 'owner') {
+            abort(403);
+        }
+        
+        return view('colocations.edit', compact('colocation'));
     }
 
     /**
@@ -78,7 +90,29 @@ class ColocationController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $colocation = Colocation::findOrFail($id);
+        
+        $userRole = DB::table('colocation_user')
+            ->where('colocation_id', $id)
+            ->where('user_id', auth()->id())
+            ->whereNull('left_at')
+            ->value('role');
+        
+        if ($userRole !== 'owner') {
+            abort(403);
+        }
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+        
+        $colocation->update([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
+        
+        return redirect()->back()->with('success', 'Colocation updated successfully!');
     }
 
     /**
@@ -86,6 +120,6 @@ class ColocationController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+
     }
 }
