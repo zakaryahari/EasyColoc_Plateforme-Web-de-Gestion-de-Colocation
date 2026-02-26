@@ -7,6 +7,7 @@ use App\Models\Membership;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 
 class InvitationController extends Controller
@@ -61,30 +62,33 @@ class InvitationController extends Controller
      */
     public function store(Request $request)
     {
-        $request()->validate([
-            'email' => 'required|email'
-        ]);
-
-        $Random_Token = str(random(32));
-
         $activeMembership = auth()->user()->memberships()->whereNull('left_at')->first();
         
         if (!$activeMembership) {
             return redirect()->back()->with('error', 'You must be in a house to invite people.');
-            }
+        }
         
-        $id_colocation = $activeMembership->id_colocation;
+        if ($activeMembership->role !== 'owner') {
+            abort(403, 'Only the owner can send invitations.');
+        }
+        
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $Random_Token = str(random(32));
             
         Invitation::create([
             'email' => $request->email,
             'token' => $Random_Token,
-            'id_colocation' => $id_colocation
+            'id_colocation' => $activeMembership->colocation_id
         ]);
 
         Mail::raw("You have been invited! Your token is: " . $Random_Token, function ($message) use ($request) {
             $message->to($request->email)
                     ->subject('Invitation to join a Colocation');
         });
+        
         return response()->json(['message' => 'Invitation sent | Token : '. $Random_Token]);
     }
 
