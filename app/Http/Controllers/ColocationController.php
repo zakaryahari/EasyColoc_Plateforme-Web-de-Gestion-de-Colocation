@@ -32,7 +32,6 @@ class ColocationController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
         ]);
 
         if ($request->user()->hasActiveMembership()) {
@@ -42,19 +41,20 @@ class ColocationController extends Controller
         DB::transaction(function() use ($request){
             $colocation = Colocation::create([
                 'name' => $request->name,
-                'description' => $request->description,
                 'owner_id' => $request->user()->id,
             ]);
 
-            Membership::create([
+            DB::table('colocation_user')->insert([
                 'user_id' => $request->user()->id,
                 'colocation_id' => $colocation->id,
                 'role' => 'owner',
-                'joined_at' => now()
+                'joined_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
         });
 
-        return redirect()->route('dashboard')->with('success', 'Colocation created successfully!');
+        return redirect()->route('colocations.show')->with('success', 'Colocation created successfully!');
     }
 
     /**
@@ -104,12 +104,10 @@ class ColocationController extends Controller
         
         $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
         ]);
         
         $colocation->update([
             'name' => $request->name,
-            'description' => $request->description,
         ]);
         
         return redirect()->back()->with('success', 'Colocation updated successfully!');
@@ -157,5 +155,61 @@ class ColocationController extends Controller
             ->update(['left_at' => now()]);
         
         return redirect()->back()->with('success', 'Member removed successfully!');
+    }
+    
+    public function leave()
+    {
+        $membership = auth()->user()->colocations()->wherePivot('left_at', null)->first();
+        
+        if (!$membership) {
+            return redirect()->back()->with('error', 'You are not in a colocation.');
+        }
+        
+        $colocationId = $membership->id;
+        
+        // Get owner ID
+        $ownerId = DB::table('colocation_user')
+            ->where('colocation_id', $colocationId)
+            ->where('role', 'owner')
+            ->whereNull('left_at')
+            ->value('user_id');
+        
+        // Prevent owner from leaving if there are other members
+        if (auth()->id() == $ownerId) {
+            $memberCount = DB::table('colocation_user')
+                ->where('colocation_id', $colocationId)
+                ->whereNull('left_at')
+                ->count();
+            
+            if ($memberCount > 1) {
+                return redirect()->back()->with('error', 'Owner cannot leave while other members are present.');
+            }
+        }
+        
+        DB::transaction(function() use ($colocationId, $ownerId) {
+            // Transfer unpaid shares to owner
+            DB::table('expense_shares')
+                ->whereIn('expense_id', function($query) use ($colocationId) {
+                    $query->select('id')
+                        ->from('expenses')
+                        ->where('colocation_id', $colocationId);
+                })
+                ->where('user_id', auth()->id())
+                ->where('is_paid', false)
+                ->update(['user_id' => $ownerId]);
+            
+            // Set left_at
+            DB::table('colocation_user')
+                ->where('colocation_id', $colocationId)
+                ->where('user_id', auth()->id())
+                ->update(['left_at' => now()]);
+            
+            // Decrement reputation by 20
+            DB::table('users')
+                ->where('id', auth()->id())
+                ->decrement('reputation', 20);
+        });
+        
+        return redirect()->route('welcome')->with('success', 'You have left the colocation.');
     }
 }
