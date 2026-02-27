@@ -167,14 +167,12 @@ class ColocationController extends Controller
         
         $colocationId = $membership->id;
         
-        // Get owner ID
         $ownerId = DB::table('colocation_user')
             ->where('colocation_id', $colocationId)
             ->where('role', 'owner')
             ->whereNull('left_at')
             ->value('user_id');
         
-        // Prevent owner from leaving if there are other members
         if (auth()->id() == $ownerId) {
             $memberCount = DB::table('colocation_user')
                 ->where('colocation_id', $colocationId)
@@ -187,7 +185,6 @@ class ColocationController extends Controller
         }
         
         DB::transaction(function() use ($colocationId, $ownerId) {
-            // Transfer unpaid shares to owner
             DB::table('expense_shares')
                 ->whereIn('expense_id', function($query) use ($colocationId) {
                     $query->select('id')
@@ -198,16 +195,14 @@ class ColocationController extends Controller
                 ->where('is_paid', false)
                 ->update(['user_id' => $ownerId]);
             
-            // Set left_at
             DB::table('colocation_user')
                 ->where('colocation_id', $colocationId)
                 ->where('user_id', auth()->id())
                 ->update(['left_at' => now()]);
             
-            // Decrement reputation by 20
             DB::table('users')
                 ->where('id', auth()->id())
-                ->decrement('reputation', 20);
+                ->decrement('reputation', 1);
         });
         
         return redirect()->route('welcome')->with('success', 'You have left the colocation.');
