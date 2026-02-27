@@ -32,6 +32,17 @@
         ->get()
         ->groupBy('user_id');
         
+        $owedByMe = \App\Models\ExpenseShare::whereHas('expense', function($q) use ($colocationId) {
+            $q->where('colocation_id', $colocationId);
+        })
+        ->where('user_id', auth()->id())
+        ->where('is_paid', false)
+        ->with('expense.payer')
+        ->get()
+        ->groupBy(function($share) {
+            return $share->expense->payer_id;
+        });
+        
         $ownerId = DB::table('colocation_user')
             ->where('colocation_id', $colocationId)
             ->where('role', 'owner')
@@ -230,6 +241,37 @@
                         </div>
                     @empty
                         <p class="text-slate-500 text-sm text-center py-4">No pending payments</p>
+                    @endforelse
+                </div>
+
+                <!-- Who You Owe Card -->
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50 shadow-xl">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Vos Dettes
+                    </h3>
+                    
+                    @forelse($owedByMe as $payerId => $shares)
+                        @php
+                            $totalOwed = $shares->sum('amount');
+                            $payer = $shares->first()->expense->payer;
+                        @endphp
+                        <div class="mb-4 pb-4 border-b border-slate-700/50 last:border-0">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-xs font-bold">{{ substr($payer->name, 0, 1) }}</span>
+                                    </div>
+                                    <span class="text-slate-300 font-medium">{{ $payer->name }}</span>
+                                </div>
+                                <span class="text-red-500 font-bold">{{ number_format($totalOwed, 2) }} DH</span>
+                            </div>
+                            <p class="text-xs text-slate-500 ml-10">you owe</p>
+                        </div>
+                    @empty
+                        <p class="text-slate-500 text-sm text-center py-4">No pending debts</p>
                     @endforelse
                 </div>
 
