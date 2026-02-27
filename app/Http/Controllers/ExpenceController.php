@@ -163,13 +163,15 @@ class ExpenceController extends Controller
             ->whereNull('left_at')
             ->exists();
         
-        if ($isOwner) {
-            $share->update(['is_paid' => true]);
-            return redirect()->back()->with('success', 'Payment marked as paid.');
-        }
-        
-        if ($share->user_id == auth()->id()) {
-            $share->update(['is_paid' => true]);
+        if ($isOwner || $share->user_id == auth()->id()) {
+            DB::transaction(function () use ($share) {
+                $share->update(['is_paid' => true]);
+                
+                DB::table('users')
+                    ->where('id', $share->user_id)
+                    ->increment('reputation', 1);
+            });
+            
             return redirect()->back()->with('success', 'Payment marked as paid.');
         }
         
