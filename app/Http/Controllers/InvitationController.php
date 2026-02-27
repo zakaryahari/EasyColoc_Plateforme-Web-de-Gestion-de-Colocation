@@ -31,8 +31,7 @@ class InvitationController extends Controller
     public function accept(Request $request , $token = null)
     {
         $token = $request->token ?? $token;
-
-        $Invitation = Invitation::where('token' , $token)->firstOrFail();
+        $invitation = Invitation::where('token' , $token)->firstOrFail();
 
         if (auth()->user()->hasActiveMembership()) {
             return redirect()->route('colocations.show')
@@ -40,15 +39,12 @@ class InvitationController extends Controller
         }
 
         DB::transaction(function () use ($invitation) {
-        
- 
-            Membership::create([
+            DB::table('colocation_user')->insert([
                 'user_id' => auth()->id(),
-                'colocation_id' => $invitation->id_colocation,
+                'colocation_id' => $invitation->colocation_id,
                 'role' => 'member', 
                 'joined_at' => now(),
             ]);
-
             
             $invitation->delete();
         });
@@ -62,34 +58,35 @@ class InvitationController extends Controller
      */
     public function store(Request $request)
     {
-        $activeMembership = auth()->user()->memberships()->whereNull('left_at')->first();
+        $user = auth()->user();
+        $colocationId = DB::table('colocation_user')
+            ->where('user_id', $user->id)
+            ->where('role', 'owner')
+            ->whereNull('left_at')
+            ->value('colocation_id');
         
-        if (!$activeMembership) {
-            return redirect()->back()->with('error', 'You must be in a house to invite people.');
-        }
-        
-        if ($activeMembership->role !== 'owner') {
-            abort(403, 'Only the owner can send invitations.');
+        if (!$colocationId) {
+            return response()->json(['error' => 'Only the owner can send invitations.'], 403);
         }
         
         $request->validate([
             'email' => 'required|email'
         ]);
 
-        $Random_Token = str(random(32));
+        $token = strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
             
         Invitation::create([
             'email' => $request->email,
-            'token' => $Random_Token,
-            'id_colocation' => $activeMembership->colocation_id
+            'token' => $token,
+            'colocation_id' => $colocationId
         ]);
 
-        Mail::raw("You have been invited! Your token is: " . $Random_Token, function ($message) use ($request) {
+        Mail::raw("You have been invited to join a colocation! Your invitation token is: " . $token . "\n\nUse this token to join at: " . route('colocations.join.page'), function ($message) use ($request) {
             $message->to($request->email)
                     ->subject('Invitation to join a Colocation');
         });
         
-        return response()->json(['message' => 'Invitation sent | Token : '. $Random_Token]);
+        return response()->json(['message' => 'Invitation sent! Token: ' . $token]);
     }
 
     /**
