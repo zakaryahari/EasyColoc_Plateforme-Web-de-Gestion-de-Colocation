@@ -146,10 +146,9 @@
                     
                     <div class="space-y-3">
                         @forelse($expenses as $expense)
-                            <a href="{{ route('expenses.show', $expense->id) }}" 
-                               class="block bg-slate-900/50 rounded-xl p-5 border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10 group">
+                            <div class="block bg-slate-900/50 rounded-xl p-5 border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10 group">
                                 <div class="flex justify-between items-start">
-                                    <div class="flex-1">
+                                    <a href="{{ route('expenses.show', $expense->id) }}" class="flex-1">
                                         <div class="flex items-center space-x-3 mb-2">
                                             <h3 class="text-lg font-semibold text-white group-hover:text-indigo-400 transition-colors">{{ $expense->title }}</h3>
                                             @if($expense->category)
@@ -172,26 +171,39 @@
                                                 {{ $expense->date->format('M d, Y') }}
                                             </span>
                                         </div>
-                                    </div>
-                                    <div class="text-right ml-4">
-                                        @php
-                                            $totalShares = $expense->shares->count();
-                                            $paidShares = $expense->shares->where('is_paid', true)->count();
-                                            $debtorShares = $totalShares > 1 ? $totalShares - 1 : 1;
-                                            $paidDebtors = $paidShares > 0 ? $paidShares - 1 : 0;
-                                            $progressPercent = $debtorShares > 0 ? ($paidDebtors / $debtorShares) * 100 : 0;
-                                        @endphp
-                                        <p class="text-2xl font-bold text-white mb-1">{{ number_format($expense->amount, 2) }} DH</p>
-                                        <div class="flex items-center justify-end space-x-2">
-                                            <div class="w-20 bg-slate-700 rounded-full h-2">
-                                                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full" 
-                                                     style="width: {{ $progressPercent }}%"></div>
+                                    </a>
+                                    <div class="flex items-center space-x-3">
+                                        <div class="text-right">
+                                            @php
+                                                $totalShares = $expense->shares->count();
+                                                $paidShares = $expense->shares->where('is_paid', true)->count();
+                                                $debtorShares = $totalShares > 1 ? $totalShares - 1 : 1;
+                                                $paidDebtors = $paidShares > 0 ? $paidShares - 1 : 0;
+                                                $progressPercent = $debtorShares > 0 ? ($paidDebtors / $debtorShares) * 100 : 0;
+                                            @endphp
+                                            <p class="text-2xl font-bold text-white mb-1">{{ number_format($expense->amount, 2) }} DH</p>
+                                            <div class="flex items-center justify-end space-x-2">
+                                                <div class="w-20 bg-slate-700 rounded-full h-2">
+                                                    <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full" 
+                                                         style="width: {{ $progressPercent }}%"></div>
+                                                </div>
+                                                <span class="text-xs text-slate-400">{{ $paidDebtors }}/{{ $debtorShares }}</span>
                                             </div>
-                                            <span class="text-xs text-slate-400">{{ $paidDebtors }}/{{ $debtorShares }}</span>
                                         </div>
+                                        @if(auth()->id() == $ownerId)
+                                            <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this expense?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-500 hover:text-red-400 transition-colors p-2">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </div>
-                            </a>
+                            </div>
                         @empty
                             <div class="text-center py-12">
                                 <svg class="w-16 h-16 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
