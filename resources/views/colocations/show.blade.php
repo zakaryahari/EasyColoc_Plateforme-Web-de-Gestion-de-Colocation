@@ -291,7 +291,6 @@
                 @else
                     <form action="{{ route('colocations.leave') }}" method="POST" onsubmit="return confirm('Are you sure you want to leave this colocation? Your reputation will decrease by 1 point.')">
                         @csrf
-                        @method('DELETE')
                         <button type="submit" 
                                 class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold py-4 rounded-2xl transition-all shadow-lg hover:shadow-red-500/50 flex items-center justify-center space-x-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

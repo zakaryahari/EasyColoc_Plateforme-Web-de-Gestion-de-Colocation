@@ -84,10 +84,7 @@ Route::middleware(['auth', 'check.banned'])->group(function () {
     Route::put('/colocations/{id}', [ColocationController::class, 'update'])->name('colocations.update');
     Route::delete('/colocations/{id}', [ColocationController::class, 'destroy'])->name('colocations.destroy');
     Route::delete('/colocations/{colocationId}/members/{userId}', [ColocationController::class, 'removeMember'])->name('colocations.removeMember');
-    Route::delete('/colocations/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
-    Route::get('/colocations/leave', function() {
-        return redirect()->route('colocations.choice');
-    });
+    Route::post('/colocations/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
     Route::post('/invitations', [InvitationController::class, 'store'])->name('invitations.store');
     Route::get('/expenses/{id}', [ExpenceController::class, 'show'])->name('expenses.show');
     Route::post('/expenses', [ExpenceController::class, 'store'])->name('expenses.store');
