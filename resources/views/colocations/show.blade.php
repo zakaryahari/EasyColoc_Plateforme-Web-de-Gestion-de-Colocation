@@ -174,13 +174,20 @@
                                         </div>
                                     </div>
                                     <div class="text-right ml-4">
+                                        @php
+                                            $totalShares = $expense->shares->count();
+                                            $paidShares = $expense->shares->where('is_paid', true)->count();
+                                            $debtorShares = $totalShares > 1 ? $totalShares - 1 : 1;
+                                            $paidDebtors = $paidShares > 0 ? $paidShares - 1 : 0;
+                                            $progressPercent = $debtorShares > 0 ? ($paidDebtors / $debtorShares) * 100 : 0;
+                                        @endphp
                                         <p class="text-2xl font-bold text-white mb-1">{{ number_format($expense->amount, 2) }} DH</p>
                                         <div class="flex items-center justify-end space-x-2">
                                             <div class="w-20 bg-slate-700 rounded-full h-2">
                                                 <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full" 
-                                                     style="width: {{ ($expense->shares->where('is_paid', true)->count() / $expense->shares->count()) * 100 }}%"></div>
+                                                     style="width: {{ $progressPercent }}%"></div>
                                             </div>
-                                            <span class="text-xs text-slate-400">{{ $expense->shares->where('is_paid', true)->count() }}/{{ $expense->shares->count() }}</span>
+                                            <span class="text-xs text-slate-400">{{ $paidDebtors }}/{{ $debtorShares }}</span>
                                         </div>
                                     </div>
                                 </div>
