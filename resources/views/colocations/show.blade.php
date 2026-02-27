@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Colocation Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen">
     @php
@@ -36,6 +37,8 @@
             ->where('role', 'owner')
             ->whereNull('left_at')
             ->value('user_id');
+        
+        $categories = \App\Models\Category::all();
     @endphp
 
     <!-- Top Navigation -->
@@ -53,8 +56,21 @@
                         <p class="text-sm text-slate-400">Welcome back,</p>
                         <p class="text-white font-semibold">{{ auth()->user()->name }}</p>
                     </div>
-                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span class="text-white font-bold">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center hover:ring-2 hover:ring-indigo-400 transition-all">
+                            <span class="text-white font-bold">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                        </button>
+                        <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-xl shadow-xl border border-slate-700 py-2 z-50">
+                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
+                                Edit Profile
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -112,12 +128,21 @@
 
                 <!-- Expense History -->
                 <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50 shadow-xl">
-                    <h2 class="text-xl font-bold text-white mb-6 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Recent Expenses
-                    </h2>
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-white flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Recent Expenses
+                        </h2>
+                        <button onclick="document.getElementById('expenseModal').classList.remove('hidden')" 
+                                class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold px-6 py-2 rounded-xl transition-all shadow-lg hover:shadow-indigo-500/50 flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <span>Add Expense</span>
+                        </button>
+                    </div>
                     
                     <div class="space-y-3">
                         @forelse($expenses as $expense)
@@ -207,12 +232,23 @@
 
                 <!-- Members Card -->
                 <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50 shadow-xl">
-                    <h3 class="text-lg font-bold text-white mb-4 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                        Members
-                    </h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            Members
+                        </h3>
+                        @if(auth()->id() == $ownerId)
+                            <button onclick="document.getElementById('inviteModal').classList.remove('hidden')" 
+                                    class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all shadow-lg hover:shadow-indigo-500/50 flex items-center space-x-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span>Invite</span>
+                            </button>
+                        @endif
+                    </div>
                     
                     <div class="space-y-3">
                         @foreach($members as $member)
@@ -265,5 +301,139 @@
             </div>
         </div>
     </div>
+
+    <!-- Invite Modal -->
+    <div id="inviteModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 shadow-2xl max-w-md w-full border border-slate-700">
+            <h3 class="text-2xl font-bold text-white mb-6">Invite Someone</h3>
+
+            <form id="inviteForm" class="space-y-6">
+                @csrf
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                    <input type="email" name="email" required
+                           class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                           placeholder="friend@example.com">
+                </div>
+
+                <div id="inviteSuccess" class="hidden bg-indigo-600/20 border border-indigo-500/50 rounded-lg p-4">
+                    <p class="text-indigo-300 text-sm font-medium" id="successMessage"></p>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" 
+                            onclick="document.getElementById('inviteModal').classList.add('hidden'); document.getElementById('inviteSuccess').classList.add('hidden');"
+                            class="px-6 py-3 border border-slate-600 text-slate-300 font-medium rounded-lg hover:bg-slate-700 transition-colors">
+                        Close
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium rounded-lg transition-all shadow-lg">
+                        Send Invitation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div id="expenseModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-8 shadow-2xl max-w-2xl w-full">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">Nouvelle dépense</h3>
+
+            <form action="{{ route('expenses.store') }}" method="POST" class="space-y-6">
+                @csrf
+                
+                <!-- Titre -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Titre</label>
+                    <input type="text" name="title" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                           placeholder="Enter ....">
+                </div>
+
+                <!-- Montant & Date -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Montant (DH)</label>
+                        <input type="number" name="amount" step="0.01" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                               placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                        <input type="date" name="date" value="{{ date('Y-m-d') }}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Payé par & Catégorie -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Payé par</label>
+                        <select name="payer_id" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="">Sélectionner</option>
+                            @foreach($members as $member)
+                                <option value="{{ $member->id }}" {{ $member->id == auth()->id() ? 'selected' : '' }}>
+                                    {{ $member->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
+                        <select name="category_id" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="">Sélectionner</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" 
+                            onclick="document.getElementById('expenseModal').classList.add('hidden')"
+                            class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                        Annuler
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-[#4f46e5] hover:bg-[#4338ca] text-white font-medium rounded-lg transition-colors">
+                        Enregistrer la dépense
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('inviteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('{{ route('invitations.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: formData.get('email')
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('successMessage').textContent = data.message;
+                document.getElementById('inviteSuccess').classList.remove('hidden');
+                this.reset();
+            } catch (error) {
+                alert('Error sending invitation');
+            }
+        });
+    </script>
 </body>
 </html>
