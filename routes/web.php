@@ -87,6 +87,8 @@ Route::middleware(['auth', 'check.banned'])->group(function () {
     Route::delete('/colocations/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
     Route::post('/invitations', [InvitationController::class, 'store'])->name('invitations.store');
     Route::get('/expenses/{id}', [ExpenceController::class, 'show'])->name('expenses.show');
+    Route::post('/expenses', [ExpenceController::class, 'store'])->name('expenses.store');
+    Route::post('/expense-shares/{id}/pay', [ExpenceController::class, 'pay'])->name('expense-shares.pay');
 });
 
 require __DIR__.'/auth.php';
