@@ -173,23 +173,7 @@
                                         </div>
                                     </a>
                                     <div class="flex items-center space-x-3">
-                                        <div class="text-right">
-                                            @php
-                                                $totalShares = $expense->shares->count();
-                                                $paidShares = $expense->shares->where('is_paid', true)->count();
-                                                $debtorShares = $totalShares > 1 ? $totalShares - 1 : 1;
-                                                $paidDebtors = $paidShares > 0 ? $paidShares - 1 : 0;
-                                                $progressPercent = $debtorShares > 0 ? ($paidDebtors / $debtorShares) * 100 : 0;
-                                            @endphp
-                                            <p class="text-2xl font-bold text-white mb-1">{{ number_format($expense->amount, 2) }} DH</p>
-                                            <div class="flex items-center justify-end space-x-2">
-                                                <div class="w-20 bg-slate-700 rounded-full h-2">
-                                                    <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full" 
-                                                         style="width: {{ $progressPercent }}%"></div>
-                                                </div>
-                                                <span class="text-xs text-slate-400">{{ $paidDebtors }}/{{ $debtorShares }}</span>
-                                            </div>
-                                        </div>
+                                        <p class="text-2xl font-bold text-white">{{ number_format($expense->amount, 2) }} DH</p>
                                         @if(auth()->id() == $ownerId)
                                             <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this expense?')">
                                                 @csrf
