@@ -38,15 +38,14 @@ class ExpenceController extends Controller
      */
     public function store(Request $request)
     {
-       
-    
         $request->validate([
             'title' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
             'category_id' => 'required|exists:categories,id',
+            'payer_id' => 'required|exists:users,id',
+            'date' => 'required|date',
         ]);
 
-        
         $membership = auth()->user()->colocations()
             ->wherePivot('left_at', null)
             ->first();
@@ -57,29 +56,24 @@ class ExpenceController extends Controller
 
         $colocation_id = $membership->id;
 
-        
         $expense = Expense::create([
             'title' => $request->title,
             'amount' => $request->amount,
-            'date' => now(),
-            'payer_id' => auth()->id(),
+            'date' => $request->date,
+            'payer_id' => $request->payer_id,
             'colocation_id' => $colocation_id,
             'category_id' => $request->category_id,
         ]);
 
-     
         $roommates = User::whereHas('colocations', function ($query) use ($colocation_id) {
             $query->where('colocations.id', $colocation_id)
                   ->whereNull('colocation_user.left_at');
         })->get();
 
-        
         $shareAmount = $request->amount / $roommates->count();
 
-        
         foreach ($roommates as $roommate) {
-           
-            $isPaid = $roommate->id === auth()->id();
+            $isPaid = $roommate->id === $request->payer_id;
 
             ExpenseShare::create([
                 'expense_id' => $expense->id,
@@ -89,7 +83,7 @@ class ExpenceController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Expense added and split between roommates!');
+        return redirect()->route('colocations.show')->with('success', 'Expense added and split between roommates!');
     }
 
     /**
@@ -97,21 +91,21 @@ class ExpenceController extends Controller
      */
     public function show(string $id)
     {
-        $expense = Expense::findOrFail($id);
-
-        $shares = ExpenseShare::where('expense_id', $id)->with('user')->get();
-
-        $houseOwnerId = DB::table('colocation_user')
-            ->where('colocation_id', $expense->colocation_id)
+        $expense = Expense::with(['payer', 'shares.user', 'category', 'colocation'])->findOrFail($id);
+        
+        $colocationId = $expense->colocation_id;
+        
+        $members = User::whereHas('colocations', function($q) use ($colocationId) {
+            $q->where('colocations.id', $colocationId)->whereNull('colocation_user.left_at');
+        })->get();
+        
+        $ownerId = DB::table('colocation_user')
+            ->where('colocation_id', $colocationId)
             ->where('role', 'owner')
             ->whereNull('left_at')
             ->value('user_id');
 
-        return view('expenses.show', [
-            'expense' => $expense,
-            'shares' => $shares,
-            'houseOwnerId' => $houseOwnerId
-        ]);
+        return view('expenses.show', compact('expense', 'members', 'ownerId'));
     }
 
     /**
