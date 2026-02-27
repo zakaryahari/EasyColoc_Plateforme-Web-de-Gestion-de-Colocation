@@ -173,6 +173,10 @@ class ColocationController extends Controller
             ->whereNull('left_at')
             ->value('user_id');
         
+        if (!$ownerId) {
+            return redirect()->back()->with('error', 'No owner found for this colocation.');
+        }
+        
         if (auth()->id() == $ownerId) {
             $memberCount = DB::table('colocation_user')
                 ->where('colocation_id', $colocationId)
@@ -185,15 +189,17 @@ class ColocationController extends Controller
         }
         
         DB::transaction(function() use ($colocationId, $ownerId) {
-            DB::table('expense_shares')
-                ->whereIn('expense_id', function($query) use ($colocationId) {
-                    $query->select('id')
-                        ->from('expenses')
-                        ->where('colocation_id', $colocationId);
-                })
-                ->where('user_id', auth()->id())
-                ->where('is_paid', false)
-                ->update(['user_id' => $ownerId]);
+            if (auth()->id() != $ownerId) {
+                DB::table('expense_shares')
+                    ->whereIn('expense_id', function($query) use ($colocationId) {
+                        $query->select('id')
+                            ->from('expenses')
+                            ->where('colocation_id', $colocationId);
+                    })
+                    ->where('user_id', auth()->id())
+                    ->where('is_paid', false)
+                    ->update(['user_id' => $ownerId]);
+            }
             
             DB::table('colocation_user')
                 ->where('colocation_id', $colocationId)
