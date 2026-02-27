@@ -129,7 +129,25 @@ class ExpenceController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $expense = Expense::findOrFail($id);
+        
+        $isOwner = DB::table('colocation_user')
+            ->where('colocation_id', $expense->colocation_id)
+            ->where('user_id', auth()->id())
+            ->where('role', 'owner')
+            ->whereNull('left_at')
+            ->exists();
+        
+        if (!$isOwner) {
+            abort(403);
+        }
+        
+        DB::transaction(function () use ($expense) {
+            $expense->shares()->delete();
+            $expense->delete();
+        });
+        
+        return redirect()->route('colocations.show')->with('success', 'Expense deleted successfully.');
     }
 
     public function pay($id)
