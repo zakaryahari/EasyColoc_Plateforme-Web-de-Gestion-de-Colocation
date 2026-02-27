@@ -289,7 +289,7 @@
                         <p class="text-slate-400 text-sm">Owner cannot leave while other members are present</p>
                     </div>
                 @else
-                    <form action="{{ route('colocations.leave') }}" method="POST" onsubmit="return confirm('Are you sure you want to leave this colocation? Your reputation will decrease by 20 points.')">
+                    <form action="{{ route('colocations.leave') }}" method="POST" onsubmit="return confirm('Are you sure you want to leave this colocation? Your reputation will decrease by 1 point.')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" 
