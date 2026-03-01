@@ -33,7 +33,7 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified', 'check.banned'])->name('dashboard');
 
-// Home route - redirects based on user role/membership
+
 Route::get('/home', function () {
     $user = auth()->user();
     
@@ -59,9 +59,10 @@ Route::get('/admin' ,function(){
 })->middleware(['auth','verified' , 'check.banned' , 'check.admin']);
 
 
-Route::get('/admin/users', function () {
-    return view('admin.users');
-})->name('admin.users');
+Route::middleware(['auth', 'check.banned', 'check.admin'])->group(function () {
+    Route::get('/admin/users', [\App\Http\Controllers\AdminController::class, 'index'])->name('admin.users');
+    Route::post('/admin/users/{id}/toggle-ban', [\App\Http\Controllers\AdminController::class, 'toggleBan'])->name('admin.toggleBan');
+});
 
 
 Route::get('/colocations/choice', function () {
@@ -69,9 +70,7 @@ Route::get('/colocations/choice', function () {
 })->name('colocations.choice');
 
 
-Route::get('/colocations/dashboard', function () {
-    return view('colocations.show');
-})->name('colocations.show');
+Route::get('/colocations/dashboard', [ColocationController::class, 'dashboard'])->name('colocations.show');
 
 
 Route::get('/invitations/accept/{token}', [InvitationController::class, 'accept'])->name('invitations.accept');
