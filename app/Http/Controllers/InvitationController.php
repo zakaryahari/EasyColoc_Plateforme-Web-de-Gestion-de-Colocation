@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ColocationInvitation;
+use App\Models\Colocation;
 use App\Models\Invitation;
 use App\Models\Membership;
 use App\Models\User;
@@ -73,6 +75,7 @@ class InvitationController extends Controller
             'email' => 'required|email'
         ]);
 
+        $colocation = Colocation::findOrFail($colocationId);
         $token = strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
             
         Invitation::create([
@@ -81,10 +84,7 @@ class InvitationController extends Controller
             'colocation_id' => $colocationId
         ]);
 
-        Mail::raw("You have been invited to join a colocation! Your invitation token is: " . $token . "\n\nUse this token to join at: " . route('colocations.join.page'), function ($message) use ($request) {
-            $message->to($request->email)
-                    ->subject('Invitation to join a Colocation');
-        });
+        Mail::to($request->email)->send(new ColocationInvitation($token, $colocation->name, $user->name));
         
         return response()->json(['message' => 'Invitation sent! Token: ' . $token]);
     }
