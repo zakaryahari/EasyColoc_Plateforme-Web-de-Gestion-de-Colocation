@@ -9,47 +9,7 @@
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen">
     @php
-        $user = auth()->user();
-        $membership = $user->colocations()->wherePivot('left_at', null)->first();
         $colocation = $membership;
-        $colocationId = $membership->id;
-        
-        $expenses = \App\Models\Expense::where('colocation_id', $colocationId)
-            ->with(['payer', 'shares.user', 'category'])
-            ->latest()
-            ->get();
-        
-        $members = \App\Models\User::whereHas('colocations', function($q) use ($colocationId) {
-            $q->where('colocations.id', $colocationId)->whereNull('colocation_user.left_at');
-        })->get();
-        
-        $owedToMe = \App\Models\ExpenseShare::whereHas('expense', function($q) use ($colocationId) {
-            $q->where('colocation_id', $colocationId)->where('payer_id', auth()->id());
-        })
-        ->where('user_id', '!=', auth()->id())
-        ->where('is_paid', false)
-        ->with('user')
-        ->get()
-        ->groupBy('user_id');
-        
-        $owedByMe = \App\Models\ExpenseShare::whereHas('expense', function($q) use ($colocationId) {
-            $q->where('colocation_id', $colocationId);
-        })
-        ->where('user_id', auth()->id())
-        ->where('is_paid', false)
-        ->with('expense.payer')
-        ->get()
-        ->groupBy(function($share) {
-            return $share->expense->payer_id;
-        });
-        
-        $ownerId = DB::table('colocation_user')
-            ->where('colocation_id', $colocationId)
-            ->where('role', 'owner')
-            ->whereNull('left_at')
-            ->value('user_id');
-        
-        $categories = \App\Models\Category::all();
     @endphp
 
     <!-- Top Navigation -->
@@ -63,6 +23,14 @@
                     </span>
                 </div>
                 <div class="flex items-center space-x-4">
+                    @if(auth()->user()->is_admin)
+                        <a href="{{ route('admin.users') }}" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold px-4 py-2 rounded-lg transition-all shadow-lg flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            <span>Panneau Admin</span>
+                        </a>
+                    @endif
                     <div class="text-right">
                         <p class="text-sm text-slate-400">Welcome back,</p>
                         <p class="text-white font-semibold">{{ auth()->user()->name }}</p>
@@ -139,7 +107,7 @@
 
                 <!-- Expense History -->
                 <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50 shadow-xl">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center justify-between mb-4">
                         <h2 class="text-xl font-bold text-white flex items-center">
                             <svg class="w-6 h-6 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -153,6 +121,21 @@
                             </svg>
                             <span>Add Expense</span>
                         </button>
+                    </div>
+                    
+                    <!-- Month Filter -->
+                    <div class="mb-4">
+                        <form method="GET" action="{{ route('colocations.show') }}" class="flex items-center space-x-3">
+                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                            </svg>
+                            <select name="month" onchange="this.form.submit()" class="bg-slate-800/90 border border-slate-700 text-slate-300 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                <option value="all" {{ !$selectedMonth || $selectedMonth == 'all' ? 'selected' : '' }}>All Months</option>
+                                @foreach($months as $month)
+                                    <option value="{{ $month['value'] }}" {{ $selectedMonth == $month['value'] ? 'selected' : '' }}>{{ $month['name'] }}</option>
+                                @endforeach
+                            </select>
+                        </form>
                     </div>
                     
                     <div class="space-y-3">
@@ -314,9 +297,22 @@
                                         @endif
                                     </div>
                                 </div>
-                                <span class="px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold rounded-full shadow-lg">
-                                    {{ $member->reputation ?? 100 }}
-                                </span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold rounded-full shadow-lg">
+                                        {{ $member->reputation ?? 100 }}
+                                    </span>
+                                    @if(auth()->id() == $ownerId && $member->id != $ownerId)
+                                        <form action="{{ route('colocations.removeMember', [$colocationId, $member->id]) }}" method="POST" onsubmit="return confirm('Remove {{ $member->name }} from colocation?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:text-red-400 transition-colors p-1">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </div>
                         @endforeach
                     </div>
