@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Colocation;
+use App\Models\Expense;
+use App\Models\ExpenseShare;
 use App\Models\Membership;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -137,8 +141,6 @@ class ColocationController extends Controller
     
     public function removeMember(Request $request, $colocationId, $userId)
     {
-        $colocation = Colocation::findOrFail($colocationId);
-        
         $userRole = DB::table('colocation_user')
             ->where('colocation_id', $colocationId)
             ->where('user_id', auth()->id())
@@ -149,12 +151,101 @@ class ColocationController extends Controller
             abort(403);
         }
         
-        DB::table('colocation_user')
-            ->where('colocation_id', $colocationId)
-            ->where('user_id', $userId)
-            ->update(['left_at' => now()]);
+        $ownerId = auth()->id();
+        
+        DB::transaction(function() use ($colocationId, $userId, $ownerId) {
+            DB::table('expense_shares')
+                ->whereIn('expense_id', function($query) use ($colocationId) {
+                    $query->select('id')
+                        ->from('expenses')
+                        ->where('colocation_id', $colocationId);
+                })
+                ->where('user_id', $userId)
+                ->where('is_paid', false)
+                ->update(['user_id' => $ownerId]);
+            
+            DB::table('colocation_user')
+                ->where('colocation_id', $colocationId)
+                ->where('user_id', $userId)
+                ->update(['left_at' => now()]);
+            
+            DB::table('users')
+                ->where('id', $userId)
+                ->decrement('reputation', 1);
+        });
         
         return redirect()->back()->with('success', 'Member removed successfully!');
+    }
+    
+    public function dashboard(Request $request)
+    {
+        $user = auth()->user();
+        $membership = $user->colocations()->wherePivot('left_at', null)->first();
+        
+        if (!$membership) {
+            return redirect()->route('welcome');
+        }
+        
+        $colocationId = $membership->id;
+        $selectedMonth = $request->month;
+        
+        $expensesQuery = Expense::where('colocation_id', $colocationId)
+            ->with(['payer', 'shares.user', 'category']);
+        
+        if ($selectedMonth && $selectedMonth != 'all') {
+            $expensesQuery->whereMonth('date', $selectedMonth);
+        }
+        
+        $expenses = $expensesQuery->latest()->get();
+        
+        $members = User::whereHas('colocations', function($q) use ($colocationId) {
+            $q->where('colocations.id', $colocationId)->whereNull('colocation_user.left_at');
+        })->get();
+        
+        $owedToMe = ExpenseShare::whereHas('expense', function($q) use ($colocationId) {
+            $q->where('colocation_id', $colocationId)->where('payer_id', auth()->id());
+        })
+        ->where('user_id', '!=', auth()->id())
+        ->where('is_paid', false)
+        ->with('user')
+        ->get()
+        ->groupBy('user_id');
+        
+        $owedByMe = ExpenseShare::whereHas('expense', function($q) use ($colocationId) {
+            $q->where('colocation_id', $colocationId);
+        })
+        ->where('user_id', auth()->id())
+        ->where('is_paid', false)
+        ->with('expense.payer')
+        ->get()
+        ->groupBy(function($share) {
+            return $share->expense->payer_id;
+        });
+        
+        $ownerId = DB::table('colocation_user')
+            ->where('colocation_id', $colocationId)
+            ->where('role', 'owner')
+            ->whereNull('left_at')
+            ->value('user_id');
+        
+        $categories = Category::all();
+        
+        $months = [
+            ['value' => '1', 'name' => 'January'],
+            ['value' => '2', 'name' => 'February'],
+            ['value' => '3', 'name' => 'March'],
+            ['value' => '4', 'name' => 'April'],
+            ['value' => '5', 'name' => 'May'],
+            ['value' => '6', 'name' => 'June'],
+            ['value' => '7', 'name' => 'July'],
+            ['value' => '8', 'name' => 'August'],
+            ['value' => '9', 'name' => 'September'],
+            ['value' => '10', 'name' => 'October'],
+            ['value' => '11', 'name' => 'November'],
+            ['value' => '12', 'name' => 'December'],
+        ];
+        
+        return view('colocations.show', compact('membership', 'expenses', 'members', 'owedToMe', 'owedByMe', 'ownerId', 'categories', 'selectedMonth', 'months', 'colocationId'));
     }
     
     public function leave()
