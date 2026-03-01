@@ -1,264 +1,271 @@
 <!DOCTYPE html>
-
-<html class="light" lang="fr"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>EasyColoc Admin - Gestion des Utilisateurs</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#6467f2",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#101122",
-                    },
-                    fontFamily: {
-                        "display": ["Inter"]
-                    },
-                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Users</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
-<div class="flex h-screen overflow-hidden">
-<!-- SideNavBar -->
-<aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
-<div class="p-6 flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
-<span class="material-symbols-outlined">home_work</span>
-</div>
-<div>
-<h1 class="text-slate-900 dark:text-white font-bold text-lg leading-tight">EasyColoc</h1>
-<p class="text-slate-500 text-xs font-medium">Admin Console</p>
-</div>
-</div>
-<nav class="flex-1 px-4 space-y-1">
-<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="text-sm font-medium">Dashboard</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg transition-colors" href="#">
-<span class="material-symbols-outlined">group</span>
-<span class="text-sm font-medium">Users</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
-<span class="material-symbols-outlined">receipt_long</span>
-<span class="text-sm font-medium">Expenses</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
-<span class="material-symbols-outlined">settings</span>
-<span class="text-sm font-medium">Settings</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
-<span class="material-symbols-outlined">description</span>
-<span class="text-sm font-medium">Logs</span>
-</a>
-</nav>
-<div class="p-4 border-t border-slate-200 dark:border-slate-800">
-<div class="flex items-center gap-3 p-2">
-<div class="size-8 rounded-full bg-slate-200" data-alt="Admin user profile avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC4vZIV0oRCguWQ618AMoX0pFkqQ821nU6UDXpN1KZSmzTDZoxH4NCHqDYNgcM2aeFFXleiAb-mdHcOfFlJ0l1hkqeMeUkmZwN2LnlskWLBnRDLM1Y3LkJisT_ZJ4GzDT1qz0GtCDQNS2GECLRoBrho0qVccjGr9oO3thUUULvmhP2z_zsxvFIKXYL9AfUBBsP7w06ZVOFT2SYxB4VtTsE9iVlSVj-JA3utLbvK9mcirEnPZRKTTgOaiiFHkaPG81zXiZK4De9pe8c'); background-size: cover;"></div>
-<div class="flex-1 overflow-hidden">
-<p class="text-sm font-medium truncate">System Admin</p>
-<p class="text-xs text-slate-500 truncate">admin@easycoloc.com</p>
-</div>
-<span class="material-symbols-outlined text-slate-400 text-sm">logout</span>
-</div>
-</div>
-</aside>
-<!-- Main Content -->
-<main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark">
-<div class="max-w-7xl mx-auto p-8">
-<!-- Stat Cards Row -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-<div class="flex justify-between items-start mb-4">
-<span class="text-slate-500 text-sm font-medium">Total Users</span>
-<div class="p-2 bg-primary/10 rounded-lg text-primary">
-<span class="material-symbols-outlined">person</span>
-</div>
-</div>
-<div class="flex items-baseline gap-2">
-<p class="text-2xl font-bold text-slate-900 dark:text-white">1,284</p>
-<span class="text-emerald-500 text-xs font-semibold">+12%</span>
-</div>
-</div>
-<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-<div class="flex justify-between items-start mb-4">
-<span class="text-slate-500 text-sm font-medium">Active Colocations</span>
-<div class="p-2 bg-primary/10 rounded-lg text-primary">
-<span class="material-symbols-outlined">apartment</span>
-</div>
-</div>
-<div class="flex items-baseline gap-2">
-<p class="text-2xl font-bold text-slate-900 dark:text-white">432</p>
-<span class="text-emerald-500 text-xs font-semibold">+5%</span>
-</div>
-</div>
-<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-<div class="flex justify-between items-start mb-4">
-<span class="text-slate-500 text-sm font-medium">Total Expenses</span>
-<div class="p-2 bg-primary/10 rounded-lg text-primary">
-<span class="material-symbols-outlined">payments</span>
-</div>
-</div>
-<div class="flex items-baseline gap-2">
-<p class="text-2xl font-bold text-slate-900 dark:text-white">$12,850</p>
-<span class="text-emerald-500 text-xs font-semibold">+18%</span>
-</div>
-</div>
-<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-<div class="flex justify-between items-start mb-4">
-<span class="text-slate-500 text-sm font-medium">Banned Users</span>
-<div class="p-2 bg-red-500/10 rounded-lg text-red-500">
-<span class="material-symbols-outlined">block</span>
-</div>
-</div>
-<div class="flex items-baseline gap-2">
-<p class="text-2xl font-bold text-slate-900 dark:text-white">14</p>
-<span class="text-red-500 text-xs font-semibold">-2%</span>
-</div>
-</div>
-</div>
-<!-- Main Section Header -->
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-<h2 class="text-2xl font-bold text-slate-900 dark:text-white">Gestion des Utilisateurs</h2>
-<div class="flex items-center gap-3">
-<button class="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2">
-<span class="material-symbols-outlined text-base">download</span>
-                            Export CSV
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen">
+    @php
+        $user = auth()->user();
+    @endphp
+
+    <!-- Top Navigation -->
+    <nav class="bg-slate-900/50 backdrop-blur-lg border-b border-slate-700/50 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-white">Panneau Admin</h1>
+                    <span class="px-3 py-1 bg-red-600/20 text-red-400 text-sm rounded-full border border-red-500/30">
+                        {{ $users->count() }} Users
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    @if($user->hasActiveMembership())
+                        <a href="{{ route('colocations.show') }}" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold px-4 py-2 rounded-lg transition-all shadow-lg">
+                            Retour au Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('dashboard') }}" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold px-4 py-2 rounded-lg transition-all shadow-lg">
+                            Retour au Dashboard
+                        </a>
+                    @endif
+                    <div class="text-right">
+                        <p class="text-sm text-slate-400">Admin</p>
+                        <p class="text-white font-semibold">{{ $user->name }}</p>
+                    </div>
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center hover:ring-2 hover:ring-red-400 transition-all">
+                            <span class="text-white font-bold">{{ substr($user->name, 0, 1) }}</span>
                         </button>
-<button class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
-<span class="material-symbols-outlined text-base">person_add</span>
-                            Ajouter un utilisateur
-                        </button>
-</div>
-</div>
-<!-- Table Area -->
-<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-<div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-end">
-<div class="relative w-full max-w-sm">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
-<input class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400" placeholder="Rechercher un utilisateur..." type="text"/>
-</div>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
-<tr class="bg-slate-50 dark:bg-slate-800/50">
-<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider w-12">#</th>
-<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
-<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
-<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reputation</th>
-<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Role</th>
-<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-<!-- Row 1 -->
-<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-<td class="px-6 py-4 text-sm text-slate-500">1</td>
-<td class="px-6 py-4">
-<div class="flex items-center gap-3">
-<div class="size-10 rounded-full bg-slate-100" data-alt="Alice Chen avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA7QazYEgfgu5cCHhAzDSU8Ew7XAAT5cuKUIaN0PLa6R65AMzPjmW9WH0x3eZguLlBgJbqOWe3OUaHHWOSbrOVLdM1I9tePXhjaoe8bPECAdLMJ89mHOsiznDJCufVBuLdBJGigkpJUsHrRUDkS1OEO97Qc4iD5CrhbuekgXu-OGpDuwE2p4FMeBq6axbUoWdmCJ5ASZ3uitUyC72ysi3PUHT7iWBuh6tTdVfKE9_xpaBpmI8uo4UsVKMoze_m0v05amd4r40mz4Yc'); background-size: cover;"></div>
-<span class="text-sm font-semibold text-slate-900 dark:text-white">Alice Chen</span>
-</div>
-</td>
-<td class="px-6 py-4 text-sm text-slate-500">alice@example.com</td>
-<td class="px-6 py-4">
-<span class="text-sm font-medium text-slate-700 dark:text-slate-300">98 pts</span>
-</td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                            Active
-                                        </span>
-</td>
-<td class="px-6 py-4 text-sm text-slate-500 font-medium">Admin</td>
-<td class="px-6 py-4 text-right">
-<button class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-lg text-xs font-bold cursor-not-allowed" disabled="">
-                                            Protected
-                                        </button>
-</td>
-</tr>
-<!-- Row 2 -->
-<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-<td class="px-6 py-4 text-sm text-slate-500">2</td>
-<td class="px-6 py-4">
-<div class="flex items-center gap-3">
-<div class="size-10 rounded-full bg-slate-100" data-alt="Bob Smith avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA04rsNiurVc4kVi8K41KtJJ_Cm-gIQIK5NIPUxzQ_NCt6IST8kIh0_AhKqOZkFhFnJJFGARkd9FNAUhIzO86WVMMkYZTytzaRfJKn5ZJRl8aUSUe5vg-dQoc17i6jyYR1aPF27o5uenY7em3RPAVhaA-s_O7FLuZRMmktvyM1ppsdMA0qi4wFkq0bgwjmAalOhiT-dwMBaCHRU0OCKDSxMcyevpE7v8g8MTjR5WWMPBkhxUOIAqi_p1nKphJTGaJjU4QlwbGs8oC4'); background-size: cover;"></div>
-<span class="text-sm font-semibold text-slate-900 dark:text-white">Bob Smith</span>
-</div>
-</td>
-<td class="px-6 py-4 text-sm text-slate-500">bob@example.com</td>
-<td class="px-6 py-4">
-<span class="text-sm font-medium text-slate-700 dark:text-slate-300">45 pts</span>
-</td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                            Active
-                                        </span>
-</td>
-<td class="px-6 py-4 text-sm text-slate-500">Member</td>
-<td class="px-6 py-4 text-right">
-<button class="px-3 py-1.5 border border-red-200 text-red-600 dark:border-red-900/50 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-xs font-bold transition-colors">
-                                            Ban
-                                        </button>
-</td>
-</tr>
-<!-- Row 3 -->
-<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-<td class="px-6 py-4 text-sm text-slate-500">3</td>
-<td class="px-6 py-4">
-<div class="flex items-center gap-3">
-<div class="size-10 rounded-full bg-slate-100" data-alt="Evan Wright avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBqLqL513MTjyUE8lo7MhrzoD5h3nj4VU7oDEZBf_Swh509oJOm4qiT4FT5SBRXprCPt4H80BHkZMySFPDofxKQHcin4ZaXyu9fwR6ks7XBWGwRMHCzJdS-dJm2hfE0S2Uc9n2c1ML81slzFdbolRIOZqvKRr49touAEZZQpO9kjfPhH14L1Vv9zmXPlnNleHOUX17o75UkiBqULQbrVzMTDjliRWhNpeT5Oc6SGVc4zSSsuuY3PV1NUxADycH2b-bDuEv-DbyrL58'); background-size: cover;"></div>
-<span class="text-sm font-semibold text-slate-900 dark:text-white">Evan Wright</span>
-</div>
-</td>
-<td class="px-6 py-4 text-sm text-slate-500">evan@example.com</td>
-<td class="px-6 py-4">
-<span class="text-sm font-medium text-slate-700 dark:text-slate-300">12 pts</span>
-</td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                                            Banned
-                                        </span>
-</td>
-<td class="px-6 py-4 text-sm text-slate-500">Member</td>
-<td class="px-6 py-4 text-right">
-<button class="px-3 py-1.5 border border-emerald-200 text-emerald-600 dark:border-emerald-900/50 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg text-xs font-bold transition-colors">
-                                            Unban
-                                        </button>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<!-- Pagination (Added for completeness) -->
-<div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-<p class="text-sm text-slate-500">Showing 1 to 3 of 1,284 users</p>
-<div class="flex items-center gap-2">
-<button class="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-600">
-<span class="material-symbols-outlined text-sm">chevron_left</span>
-</button>
-<button class="size-8 rounded-lg bg-primary text-white text-sm font-medium">1</button>
-<button class="size-8 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium">2</button>
-<button class="size-8 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium">3</button>
-<span class="px-2 text-slate-400">...</span>
-<button class="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-600">
-<span class="material-symbols-outlined text-sm">chevron_right</span>
-</button>
-</div>
-</div>
-</div>
-</div>
-</main>
-</div>
-</body></html>
+                        <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-xl shadow-xl border border-slate-700 py-2 z-50">
+                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
+                                Edit Profile
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        @if(session('success'))
+            <div class="bg-green-500/20 border border-green-500 text-green-400 px-6 py-4 rounded-xl mb-6 flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <!-- Statistics Header -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="bg-slate-800/50 rounded-xl p-4 border border-indigo-600/30">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-xs mb-1">Total Users</p>
+                        <p class="text-2xl font-bold text-white">{{ $totalUsers }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-indigo-600/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/50 rounded-xl p-4 border border-indigo-600/30">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-xs mb-1">Total Houses</p>
+                        <p class="text-2xl font-bold text-white">{{ $totalColocations }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-purple-600/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/50 rounded-xl p-4 border border-indigo-600/30">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-xs mb-1">Total Expenses</p>
+                        <p class="text-2xl font-bold text-white">{{ number_format($totalExpenses, 0) }} DH</p>
+                    </div>
+                    <div class="w-10 h-10 bg-yellow-600/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/50 rounded-xl p-4 border border-indigo-600/30">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-xs mb-1">Active Memberships</p>
+                        <p class="text-2xl font-bold text-white">{{ $activeMemberships }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-green-600/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Content - Users Table -->
+            <div class="lg:col-span-2">
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50 shadow-xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-white flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                            Gestion des Utilisateurs
+                        </h2>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-slate-700">
+                                    <th class="px-4 py-3 text-left text-slate-400 font-semibold text-sm">User</th>
+                                    <th class="px-4 py-3 text-left text-slate-400 font-semibold text-sm">Reputation</th>
+                                    <th class="px-4 py-3 text-left text-slate-400 font-semibold text-sm">Status</th>
+                                    <th class="px-4 py-3 text-left text-slate-400 font-semibold text-sm">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700/50">
+                                @foreach($users as $userItem)
+                                    <tr class="hover:bg-slate-900/50 transition">
+                                        <td class="px-4 py-4">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                                                    <span class="text-white text-sm font-bold">{{ substr($userItem->name, 0, 1) }}</span>
+                                                </div>
+                                                <div>
+                                                    <div class="font-semibold text-white">{{ $userItem->name }}</div>
+                                                    <div class="text-sm text-slate-400">{{ $userItem->email }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            <span class="px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold rounded-full shadow-lg">
+                                                {{ $userItem->reputation }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            @if($userItem->is_banned)
+                                                <span class="flex items-center space-x-1 text-red-400">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                                    </svg>
+                                                    <span class="text-sm font-medium">Banni</span>
+                                                </span>
+                                            @else
+                                                <span class="flex items-center space-x-1 text-green-400">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    <span class="text-sm font-medium">Actif</span>
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-4">
+                                            <form action="{{ route('admin.toggleBan', $userItem->id) }}" method="POST">
+                                                @csrf
+                                                @method('POST')
+                                                <button type="submit" class="{{ $userItem->is_banned ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700' }} text-white px-4 py-2 rounded-lg transition font-medium text-sm shadow-lg">
+                                                    {{ $userItem->is_banned ? 'Débannir' : 'Bannir' }}
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar - Stats -->
+            <div class="space-y-6">
+                <!-- Total Users Card -->
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50 shadow-xl">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        Statistiques
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl border border-slate-700/30">
+                            <div>
+                                <p class="text-slate-400 text-sm">Total Users</p>
+                                <p class="text-2xl font-bold text-white">{{ $users->count() }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-indigo-600/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl border border-slate-700/30">
+                            <div>
+                                <p class="text-slate-400 text-sm">Active Users</p>
+                                <p class="text-2xl font-bold text-green-400">{{ $users->where('is_banned', false)->count() }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-600/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl border border-slate-700/30">
+                            <div>
+                                <p class="text-slate-400 text-sm">Banned Users</p>
+                                <p class="text-2xl font-bold text-red-400">{{ $users->where('is_banned', true)->count() }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-red-600/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Info Card -->
+                <div class="bg-gradient-to-br from-red-800 to-red-900 rounded-2xl p-6 border border-red-700/50 shadow-xl">
+                    <h3 class="text-lg font-bold text-white mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        Admin Access
+                    </h3>
+                    <p class="text-red-200 text-sm leading-relaxed">
+                        You have full administrative privileges. Use ban/unban actions carefully.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
