@@ -29,16 +29,17 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
- 
-        if ($user->is_admin) {
-            return redirect()->intended(route('admin.users'));
+        if ($user->is_banned) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->withErrors(['email' => 'Your account has been banned.']);
         }
 
         if ($user->hasActiveMembership()) {
-            return redirect()->intended(route('colocations.show'));
+            return redirect()->route('colocations.show');
         }
 
-        
         return redirect()->intended(route('colocations.choice'));
     }
 
